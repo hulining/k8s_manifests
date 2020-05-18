@@ -1,0 +1,25 @@
+# this storageclass configuration need create secret named "ceph-secret-admin" and "ceph-secret-user" via command:
+# ### ceph auth get-key client.admin > /tmp/key
+# ### kubectl create secret generic ceph-secret-admin --from-file=/tmp/key --namespace=kube-system --type=kubernetes.io/rbd
+# ### ceph osd pool create kube 8 8
+# ### ceph auth add client.kube mon 'allow r' osd 'allow rwx pool=kube'
+# ### ceph auth get-key client.kube > /tmp/client-key
+# ### kubectl create secret generic ceph-secret-user --from-file=/tmp/client-key --namespace=kube-system --type=kubernetes.io/rbd
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ceph-storageclass
+provisioner: ceph.com/rbd
+parameters:
+  monitors: 10.71.3.10:6789
+  adminId: admin
+  adminSecretName: ceph-secret-admin
+  adminSecretNamespace: kube-system
+  pool: kube
+  userId: kube
+  userSecretName: ceph-secret-user
+  userSecretNamespace: kube-system
+  fsType: xfs
+  imageFormat: "2"
+  imageFeatures: "layering"

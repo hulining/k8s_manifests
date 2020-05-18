@@ -1,0 +1,25 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nginx
+spec:
+  entryPoints:
+  - web
+  routes:
+  - match: Host(`nginx.default.svc.cluster.local`) && PathPrefix(`/12`)
+    kind: Rule
+    middlewares:
+    - name: stripprefix
+    - name: basic-auth
+    - name: compress
+    services:
+    - name: nginx-12
+      port: 80
+  - match: Host(`nginx.default.svc.cluster.local`) && PathPrefix(`/14`)
+    kind: Rule
+    middlewares:
+    - name: stripprefix
+    #- name: digest-auth
+    services:
+    - name: nginx-14
+      port: 80

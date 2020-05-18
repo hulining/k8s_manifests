@@ -1,0 +1,39 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: busybox-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-storageclass
+  resources:
+    requests:
+      storage: 200Mi
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: busybox-pvc
+spec:
+  restartPolicy: "Never"
+  containers:
+  - name: busybox-pvc
+    image: busybox:1.27
+    command:
+    - "/bin/sh"
+    args:
+    - "-c"
+    - "tail -f /dev/null"
+    volumeMounts:
+    - name: storage
+      mountPath: "/mnt"
+    - name: host-time
+      mountPath: /etc/localtime
+      readOnly: true
+  volumes:
+  - name: storage
+    persistentVolumeClaim:
+      claimName: busybox-pvc
+  - name: host-time
+    hostPath:
+      path: /etc/localtime
